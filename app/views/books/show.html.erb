@@ -1,54 +1,56 @@
 <div class="body">
   <% if @book.errors.any? %>
-  <div id="error_explanation" class="alert alert-danger">
-    <ul>
-      <li>error</li>
-      <% @book.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-    </ul>
-  </div>
-<% end %>
-<%= notice %>
+    <div id="error_explanation" class="alert alert-danger">
+      <ul>
+        <li>error</li>
+           <% @book.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+           <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <%= notice %>
+
 <div class="container">
 <div class="row">
 
    <div class="col-xs-3">
       <h2>User info</h2>
-      <%= attachment_image_tag @book.user, :profile_image, :fill, 100, 100, format: 'jpeg' ,fallback: 'no_image.png',size: '100x100'%>
+         <%= attachment_image_tag @book.user, :profile_image, :fill, 100, 100, format: 'jpeg' ,fallback: 'no_image.png',size: '100x100'%>
 
-          <table class="table">
-              <tbody>
-                <tr></tr>
-                <tr>
-                  <th>name</th>
-                  <td><%= @book.user.name %></td>
-                </tr>
+        <table class="table">
+          <tbody>
+            <tr></tr>
+            <tr>
+              <th>name</th>
+              <td><%= @book.user.name %></td>
+            </tr>
 
-                <tr>
-                  <th>introduction</th>
-                  <td><%= @book.user.introduction %></td>
-                </tr>
-              </tbody>
-          </table>
+            <tr>
+              <th>introduction</th>
+              <td><%= @book.user.introduction %></td>
+            </tr>
+          </tbody>
+        </table>
 
-   <div class="row">
-    <a class="col-xs-12 btn btn-default glyphicon glyphicon-wrench edit_user" href="/users/edit"></a>
+       <div class="row">
+         <a class="col-xs-12 btn btn-default glyphicon glyphicon-wrench edit_user" href="/users/edit"></a>
 
-           <h1>New book</h1>
-               <%= form_for(@bookn, url: '/books') do |f| %>
+               <h1>New book</h1>
+                   <%= form_for(@bookn, url: '/books') do |f| %>
 
-           <h4>Title</h4>
-               <%= f.text_field :title %>
+               <h4>Title</h4>
+                   <%= f.text_field :title %>
 
-           <h4>Opinion</h4>
-               <%= f.text_area :body %>
+               <h4>Opinion</h4>
+                   <%= f.text_area :body %>
 
-           <%= f.submit 'Create Book' %>
+               <%= f.submit 'Create Book' %>
 
-           <% end %>
+               <% end %>
+       </div>
    </div>
-   </div>
+
 
 
 
@@ -59,6 +61,7 @@
 
        <thead>
           <tr>
+          <th></th>
           <th></th>
           <th></th>
           <th></th>
@@ -77,6 +80,31 @@
             </th>
           <td><%= @book.title %></td>
           <td><%= @book.body %></td>
+          <!-- favorite -->
+<td>
+                <% if @book.favorited_by?(current_user) %>
+                  <li>
+                    <%= link_to book_favorites_path(@book), method: :delete do %>
+                      <span class="glyphicon glyphicon-heart" aria-hidden="true" style="color: red;"></span>
+                      <%= @book.favorites.count %>
+                    <% end %>
+                  </li>
+                <% else %>
+                  <li>
+                    <%= link_to book_favorites_path(@book), method: :post do %>
+                      <span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span>
+                      <%= @book.favorites.count %>
+                    <% end %>
+                  </li>
+                <% end %>
+              </td>
+
+
+          <td>
+            <i class="fa fa-comment"></i>
+            コメント数：<%= @book.book_comments.count %></a>
+          </td>
+
           <td>
             <% if @book.user == current_user %>
              <%= link_to "Edit",edit_book_path(@book.id) %>
@@ -86,16 +114,64 @@
             <% if @book.user == current_user %>
               <%= link_to "Destroy", book_path, method: :delete %>
             <% end %>
+          </td>
         </tr>
         <td><%= link_to @book.user.name , user_path(@book.user.id) %></td>
 
-
-
-
     </tbody>
-
+<!-- favorite -->
 
 </table>
+<!--comment -->
+<!-- <form class="mt-20"> -->
+<%= form_for [@book, @bookc] do |f| %>
+    <div class="row">
+        <div class="col-sm-12">
+            <%= f.text_area :comment, rows:'5', class: "form-control",placeholder: "コメントをここに" %>
+        </div>
+    </div>
+    <%= f.submit "送信", class: "btn btn-lg btn-base-1 mt-20 pull-right" %>
+<% end %>
+<!-- </form> -->
+
+
+<div class="comment-list bt style-2" id="comments">
+    <div class="float-wrapper">
+        <h2 class="comment-count"><%= @book.book_comments.count %>件コメント</h2>
+    </div>
+ <ol>
+    <% @book.book_comments.each do |book_comment| %>
+        <li class="comment">
+            <div class="comment-body bb">
+                <div class="comment-avatar">
+                    <div class="avatar">
+      <%= attachment_image_tag book_comment.user, :profile_image, :fill, 60, 60, format: 'jpeg' ,fallback: 'no_image.png',size: '60x60'%>
+                    </div>
+                </div>
+                <div class="comment-text">
+                    <div class="comment-author clearfix">
+                        <a href="#" class="link-author"><%= book_comment.user.name %></a>
+                        <span class="comment-meta">
+                          <span class="comment-date"><%= book_comment.created_at.strftime('%Y/%m/%d') %></span>
+                        </span>
+                    </div>
+                    <div class="comment-entry"><%= book_comment.comment %></div>
+                </div>
+            <% if book_comment.user == current_user %>
+              <%= link_to "Destroy", book_book_comment_path(@book.id,book_comment.id), method: :delete %>
+            <% end %>
+
+            </div>
+        </li>
+    <% end %>
+
+
+
+
+  </ol>
+
+ <!-- コメント -->
+
 </div>
 </div>
 </div>

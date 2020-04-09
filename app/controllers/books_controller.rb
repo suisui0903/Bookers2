@@ -2,13 +2,16 @@ class BooksController < ApplicationController
   before_action :authenticate_user!
   def index
     @users = User.all
-    @book = Book.new
+    @bookn = Book.new
     @books = Book.all
+
+
   end
 
   def show
     @book = Book.find(params[:id])
     @bookn = Book.new
+    @bookc = BookComment.new
   end
 
   def new
