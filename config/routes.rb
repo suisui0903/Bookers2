@@ -8,10 +8,18 @@ Rails.application.routes.draw do
     }
   root :to => "homes#top"
   get '' => 'homes#top'
-  resources :users, only: [:show, :update, :edit, :index]
   resources :books do
     resource :favorites, only: [:create, :destroy]
     resources :book_comments, only: [:create, :destroy]
   end
+  resources :users do
+    member do
+     get :following, :followers
+    end
+  end
+
+  resources :relationships, only: [:create, :destroy]
+
+
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

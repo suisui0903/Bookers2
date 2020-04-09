@@ -21,6 +21,26 @@
               <td><%= current_user.introduction%></td>
             </tr>
           </tbody>
+          <td>
+                   <% @user ||= current_user %>
+                        <a href="<%= following_user_path(@user) %>">
+                          <strong id="following" class="stat">
+                            <%= @user.followings.count %>
+                          </strong>
+                          following
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                    <td>
+                        <a href="<%= followers_user_path(@user) %>">
+                          <strong id="followers" class="stat">
+                            <%= @user.followers.count %>
+                          </strong>
+                          followers
+                        </a>
+                  </td>
+
       </table>
 
   <div class="row">
@@ -51,6 +71,7 @@
 
 
 
+
 <div class="col-xs-9">
     <h2>Users</h2>
 
@@ -61,6 +82,7 @@
       <th>image</th>
       <th>name</th>
       <th></th>
+      <th></th>
     </tr>
   </thead>
 
@@ -68,11 +90,28 @@
     <% @users.each do |user| %>
       <tr>
         <td><%= attachment_image_tag user, :profile_image, :fill, 40, 40, format: 'jpeg' ,fallback: 'no_image.png',size: '40x40'%></td>
+
         <td><%= user.name %></td>
+
+        <td>
+          <% unless current_user?(user) %>
+            <% if current_user.following?(user) %>
+                <%= form_for(current_user.following_relationships.find_by(following_id: user.id), html: { method: :delete }) do |f| %>
+                  <%= f.submit "Unfollow", class: "btn btn-large follow-btn" %>
+                <% end %>
+            <% else %>
+                <%= form_for(current_user.following_relationships.build(following_id: user.id)) do |f| %>
+                  <div><%= f.hidden_field :following_id %></div>
+                  <%= f.submit "Follow", class: "btn btn-large btn-primary follow-btn" %>
+                <% end %>
+            <% end %>
+          <% end %>
+        </td>
         <td><%= link_to "Show", user_path(user.id) %></td>
       </tr>
     <% end %>
   </tbody>
+
 
 </table>
 

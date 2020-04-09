@@ -31,6 +31,26 @@
               <td><%= @book.user.introduction %></td>
             </tr>
           </tbody>
+          <td>
+                   <% @user ||= current_user %>
+                        <a href="<%= following_user_path(@user) %>">
+                          <strong id="following" class="stat">
+                            <%= @user.followings.count %>
+                          </strong>
+                          following
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                    <td>
+                        <a href="<%= followers_user_path(@user) %>">
+                          <strong id="followers" class="stat">
+                            <%= @user.followers.count %>
+                          </strong>
+                          followers
+                        </a>
+                  </td>
+
         </table>
 
        <div class="row">
